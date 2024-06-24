@@ -1,0 +1,6 @@
+*.out
+states
+*_TTrace*
+*.log
+
+.vscode
