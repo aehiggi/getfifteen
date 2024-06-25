@@ -22,7 +22,7 @@ The AI simply chooses a random card from those remaining at each move.
 
 ### Checking the model
 
-Running the model with TLC yields a state space of diameter ranging from 0 to ~50 on each run.
+Running the model with TLC yields: Diameter 10, Found 1320, Distinct 739.
 
 ### Checking the model (multiple iterations)
 

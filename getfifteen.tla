@@ -13,17 +13,16 @@
 (*The property to check is "the player never loses".                       *)
 (***************************************************************************)
 
-EXTENDS Naturals, FiniteSets, TLC, Sequences, Randomization
+EXTENDS Naturals, FiniteSets, TLC, Sequences
 
 CONSTANT winningSets, corners, centre, edges
 
 VARIABLES player,   \* The set of cards the human currently has.
           ai,  \* The set of cards the ai currently has.
           remainingCards, \* the set of cards remaining.
-          playing, \* who is taking a card
-          nextRandom \* random remaining card value to pass to next step
+          playing \* who is taking a card
 
-vars == <<remainingCards, player, ai, playing, nextRandom>>
+vars == <<remainingCards, player, ai, playing>>
 
 TypeOK == IsFiniteSet(ai) /\ IsFiniteSet(player)
 
@@ -90,16 +89,11 @@ GetResult(aihand, playerhand, remaining) == CASE AIHasWon(aihand) -> "ai wins"
 result == GetResult(ai, player, remainingCards)
 
 TakeCardAI ==
-    LET 
-        aiCard == nextRandom
-    IN 
+    \E aiCard \in remainingCards:
         /\ ai' = ai \union { aiCard }
         /\ remainingCards' = remainingCards \ { aiCard }
         /\ player' = player
         /\ playing' = "player"
-        /\ nextRandom' = IF Cardinality(remainingCards') = 0 
-            THEN 0 
-            ELSE RandomElement(remainingCards')
 
 OppositeCorner(c) == 
         CASE 
@@ -177,23 +171,18 @@ TakeCardPlayer ==
         /\ player' = player \union { playerCard }
         /\ ai' = ai
         /\ playing' = "ai"
-        /\ nextRandom' = IF Cardinality(remainingCards') = 0 
-            THEN 0 
-            ELSE RandomElement(remainingCards')
-                
-Restart == 
+
+Restart == \E starting \in {"ai", "player"}:
     /\ remainingCards' = {1,2,3,4,5,6,7,8,9}
     /\ player' = {} 
     /\ ai' = {}
-    /\ playing' = IF 1 \in RandomSubset(1, {1,2}) THEN "ai" ELSE "player"
-    /\ nextRandom' = RandomElement(remainingCards')
+    /\ playing' = starting
 
-Init == 
+Init == \E starting \in {"ai", "player"}:
     /\ remainingCards = {1,2,3,4,5,6,7,8,9}
     /\ player = {} 
     /\ ai = {}
-    /\ playing = IF 1 \in RandomSubset(1, {1,2}) THEN "ai" ELSE "player"
-    /\ nextRandom = RandomElement(remainingCards)
+    /\ playing = starting
 
 Next == \/ (result = "playing" /\ playing = "ai" /\ TakeCardAI)
         \/ (result = "playing" /\ playing = "player" /\ TakeCardPlayer)
